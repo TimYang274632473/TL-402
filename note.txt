@@ -1,0 +1,182 @@
+
+/*EEPROM/spiflash空间分配：
+
+0x000000	--	0x00FFFF:	参数区					(64K, 实际只用到4K)
+
+0x010000	--	0x04FFFF:	下载新代码存放区			(256K,实际只用到108K）	
+
+0x050000	--	0x08FFFF:	备份旧代码存放区			(256K,实际只用到108K）
+
+0x090000	--	0x1FFFFF:	GPS存储记录代码区		(2012K,实际只用到200000)
+
+Byte0-常用指令设置标志
+		bool GPRS_flag:1;          		// 1: 开启GPRS有效标志
+		bool Track_Flag:1;         		// 1: 开启连续跟踪标志		
+		bool ALM_OverSpeed_Flag:1; 		// 1: 超速报警打开标志
+		bool ALM_LowBat_Flag:1;    		// 1: 低电报警打开标志
+		bool ALM_Circle_GEO_Flag:1;    	// 1: 圆心电子围栏打开标志
+		bool SOS_CALL_ENABLE_Flag:1;	// 1: 是否允许拨打SOS电话
+		bool Any_CallIn_Flag:1;			// 1: 接听任意电话,0:比较授权号码
+		bool CallIn_ByMe_Flag:1;		// 1: 由自已主动接通或挂机; 	0: 自动接收授权号码
+		
+Byte1-123456U指令设置相关标志
+		bool Callin_SpkMode_Flag:1;		// 1: 打进通话					0: 监听
+		bool Callout_LisMode_Flag:1;	// 1: 打出静音					0: 通话          
+		bool GPS_PowerOffMode_Flag:1;	// 1: 不开启GPS电源				0: 可以开启GPS电源    
+		bool GPRS_SaveMode_Flag:1;		// 1: GPRS省流量模式				0: 按时上传数据			
+		bool GPS_StrongMode_Flag:1;		// 1: GPS超强模式,不关电			0: 省电模式
+		bool ALM_Bat_Full_On_Flag:1;	// 1: 开启充满电报警标志
+		bool ALM_Bat_Full_Send_Flag:1;	// 1: 已发送充满电标志
+		bool RTC_Update_Flag:1;			// 1: 已更新过RTC时间;			0: 未更新RTC时间
+		
+Byte2-存放车辆有关标志（新增）
+		bool GPS_Tran_Mode_Flag:1;		// 1: GPS默认输出所有数据		0: 只输出出GGA RMC
+		bool DTMF_Det_Flag:1;			// 1: 开启语音邮箱检测
+		bool SMS_Check_psw_Flag:1;		// 1: 短信需要比对密码
+		bool RTC_Alarm_Flag:1;			// 1: 已开启RTC闹铃
+		u8 reserved:4;			
+		
+Byte3-各组GEO打开标志
+		bool GEO1_flag:1;//第一组GEO开关标志
+		bool GEO2_flag:1;//第二组GEO开关标志
+		bool GEO3_flag:1;//第三组GEO开关标志
+		bool GEO4_flag:1;//第四组GEO开关标志
+		bool GEO5_flag:1;//第五组GEO开关标志
+		
+Byte4-各组GEO出去标志
+		bool GEO1_OUT_flag:1;//第一组GEO出去标志
+		bool GEO2_OUT_flag:1;//第二组GEO出去标志
+		bool GEO3_OUT_flag:1;//第三组GEO出去标志
+		bool GEO4_OUT_flag:1;//第四组GEO出去标志
+		bool GEO5_OUT_flag:1;//第五组GEO出去标志
+		
+Byte5-各组GEO进入标志
+		bool GEO1_IN_flag:1;//第一组GEO进入标志
+		bool GEO2_IN_flag:1;//第二组GEO进入标志
+		bool GEO3_IN_flag:1;//第三组GEO进入标志
+		bool GEO4_IN_flag:1;//第四组GEO进入标志
+		bool GEO5_IN_flag:1;//第五组GEO进入标志
+		
+Byte6-各组GEO设置有效标志
+		bool GEO1_valid_flag:1;//第一组GEO设置有效标志
+		bool GEO2_valid_flag:1;//第二组GEO设置有效标志
+		bool GEO3_valid_flag:1;//第三组GEO设置有效标志
+		bool GEO4_valid_flag:1;//第四组GEO设置有效标志
+		bool GEO5_valid_flag:1;//第五组GEO设置有效标志
+
+Byte7-ECHO_F
+		bool PC_MCU_Flag:1;			// 1: 开启PC发送MCU的数据回显功能
+		bool GPS_MCU_Flag:1;		// 1: 开启GPS发送到MCU的数据回显功能
+		bool MCU_GSM_Flag:1;		// 1: 开启MCU发送GSM的数据回显到PC端
+		bool GSM_MCU_Flag:1;		// 1: 开户GSM发送MCU的数据回显到PC端
+		bool BYPASS_GSM_Flag:1;		// 1: 开启PC数据直接转到GSM功能
+		u8 	reserved:3;
+
+Byte8-
+
+Byte9-
+
+__packed typedef struct  
+{	
+	char	IMEI[16];           // IMEI号
+	char	cmd_key[7];         // 指令密码，初始值：123456
+	char	apn[30];            // APN
+	char	ip_addr[18];        // IP地址
+	char	ip_port[6];         // IP端口
+	char	domain_name[24];    // 域名
+	char	domain_port[6];     // 端口
+	char	APN_username[23];   // APN用户名
+	char	APN_password[12];   // APN密码
+	u8		Track_Set_Time;     // 连续定位间隔时间（不带时间单位）
+	char	Track_Set_Unit;     // 连续定位时间单位
+	u8		TimeZone;           // 时区时
+	u8		set_speed;          // 超速阈值
+	u8		set_soc;            // 低电阈值
+	u16		Track_Send_Set;		// GPRS连续定位间隔时间
+	u16		heartbeatset;      	// 发送心跳间隔时间
+	u8		geo_radius;         // 圆心电子围栏半径
+	float	center_lat;        	// 圆心电子围栏中心纬度
+	float	center_lot;        	// 圆心电子围栏中心经度
+	u32		send_history;       // 已发送历史数据条数	
+	u32		store_history;      // 已存入历史数据条数
+	u8		spk_volume;	     	// 通话音量
+	u8		Sos_call_num;	    // sos拨打手机数量
+	u8		Sos_cycle_num;      // sos循环拨打次数	
+	u8		lowg;				// 跌落阀值
+	u8		higg;				// 碰撞阀值
+	u8		Oled_Set_Time;		// OLED显示时间
+	u8		Oled_Set_Direction;	// OLED显示方向
+	u16		Vbat_f;				// 电池电压
+	u8		ATE0_Fail_Cnt;		// GSM ATEO自动波特率测试失败次数
+	u8		gsm_model;			// GSM模块型号
+	u8		RTC_Alarm_Hour;		// 闹铃时
+	u8		RTC_Alarm_Min;		// 闹铃分
+}GSM_para; 
+
+Byte10-179:GSM_P
+
+Byte180-209:存放授权号码1；
+Byte210-239:存放授权号码2；
+Byte240-269:存放授权号码3；
+Byte270-299:存放授权号码4；
+Byte300-329:存放授权号码5；
+Byte330-359:存放授权号码6；
+Byte360-389:存放授权号码7；
+Byte390-419:存放授权号码8；
+Byte420-449:备用（授权号码）
+Byte450-479:备用（授权号码）
+
+__packed typedef struct  
+{	
+	nmea_utc_time utc;		//UTC时间
+	u32 latitude;			//纬度 分扩大100000倍,实际要除以100000 
+	u32 longitude;			//经度 分扩大100000倍,实际要除以100000
+	float temp_speed;       //速度
+	u8 ewhemi;				//东经/西经,E:东经;W:西经
+	u8 nshemi;				//北纬/南纬,N:北纬;S:南纬	
+	u8 soc;	                //剩余电量  
+	u8 sig_strength;        //信号强度
+	u16 gsmbase1;           //基站信息
+	u32 gsmbase2;           //基站信息
+	u16 operators;          //运营商
+	u8 gpssta;				//GPS状态:0,未定位;1,非差分定位;2,差分定位;6,正在估算.				  
+	u8 posslnum;			//用于定位的卫星数,0~12.		 
+	u8 AV_indicate;         //数据是否有效标志u8 a_v;='V'	
+}nmea_msg; 
+Byte500-549:存放上一次有效GPS数据；
+
+Byte550-565:存放第一组电子围栏经纬度数据；
+Byte566-581:存放第二组电子围栏经纬度数据；
+Byte582-597:存放第三组电子围栏经纬度数据；
+Byte598-613:存放第四组电子围栏经纬度数据；
+Byte614-629:存放第五组电子围栏经纬度数据；
+Byte630-649:备用（电子围栏）
+
+
+
+Byte698-701
+	u8 rly_operating_time;//继电器吸合时间
+	u8 rly_period_time;   //继电器吸合周期
+	u8 rotate_time;       //正反转时间
+	u8 ACCPWR_state;      //ACC状态
+Byte702-799:
+Byte800-839:用户设置组1GEO格式数据
+Byte840-879:用户设置组2GEO格式数据
+Byte880-919:用户设置组3GEO格式数据
+Byte920-959:用户设置组4GEO格式数据
+Byte960-999:用户设置组5GEO格式数据
+
+
+__packed typedef struct  
+{
+	unsigned char  		OTA_state;      // OTA升级状态	
+	char 				program_ver[5];	// OTA升级版本号
+	unsigned char  		OTA_errcount;   // OTA失败次数
+	unsigned char  		mcu_to_spi_bk;  // MCU备份到SPI状态
+	char				Log[20];		// 开机显示LOG内容
+	char				Device[27];		// 机器名称
+}GSM_OTA_def; 
+Byte1000-1009:OTA参数
+
+	
+*/

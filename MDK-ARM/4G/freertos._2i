@@ -1,0 +1,7 @@
+--c99 -c --cpu Cortex-M0+ -D__MICROLIB -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ..\HARDWARE\inc -I ..\sys\delay -I ..\Middlewares\Third_Party\FreeRTOS\Source\include -I ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS -I ..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS -I ..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM0 --C99
+-I.\RTE\_4G
+-IC:\TIM\software\MDK526\ARM\PACK\ARM\CMSIS\5.4.0\CMSIS\Core\Include
+-IC:\TIM\software\MDK526\ARM\PACK\Keil\STM32L0xx_DFP\2.0.1\Drivers\CMSIS\Device\ST\STM32L0xx\Include
+-IC:\TIM\software\MDK526\ARM\PACK\Keil\STM32L0xx_DFP\2.0.1\Device\Include
+-D__UVISION_VERSION="527" -D_RTE_ -DSTM32L071xx -DUSE_HAL_DRIVER -DSTM32L071xx
+-o .\4g\freertos.o --omf_browse .\4g\freertos.crf --depend .\4g\freertos.d --feedback ".\4G\4G.fed" "..\HARDWARE\src\freertos.c"

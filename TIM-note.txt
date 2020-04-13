@@ -1,0 +1,2 @@
+当获取到互斥信号量Semap_PcCmd后TASK4用于解析串口1（pc端）下发的数据,
+并调用PC_Cmd_Check（）---》PC_Cmd_Handle（）解析命令
